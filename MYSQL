@@ -1,0 +1,19 @@
+my table:
+Clientes(id, nombre, ciudad)
+Productos(id, nombre, categoria, precio)
+Pedidos(id, cliente_id, fecha)
+DetallePedidos(id, pedido_id, producto_id, cantidad)
+
+SELECT 
+    c.nombre AS cliente,
+    c.ciudad,
+    COUNT(DISTINCT p.id) AS total_pedidos,
+    SUM(dp.cantidad * pr.precio) AS total_gastado,
+    MAX(p.fecha) AS fecha_ultimo_pedido
+FROM Clientes c
+JOIN Pedidos p ON c.id = p.cliente_id
+JOIN DetallePedidos dp ON p.id = dp.pedido_id
+JOIN Productos pr ON dp.producto_id = pr.id
+GROUP BY c.id, c.nombre, c.ciudad
+ORDER BY total_gastado DESC
+LIMIT 5;
