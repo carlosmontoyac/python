@@ -1,1 +1,58 @@
+import pandas as pd
+df = pd.read_csv('https://raw.githubusercontent.com/mwaskom/seaborn-data/master/tips.csv')
+df.head()
+df.describe()
+df.isnull().sum()
+df.groupby('day')['total_bill'].sum()
+
+import pandas as pd
+data = {
+    'Name': [' Alice', 'BOB ', 'Charlie', None],
+    'Age': [25, 30, None, 22],
+    'Salary': ['50000$', '60000$', '70000$', '40000$']
+}
+df = pd.DataFrame(data)
+df['Name'] = df['Name'].str.strip()
+df['Age'] = df['Age'].fillna(df['Age'].mean())
+df['Salary'] = df['Salary'].str.replace('$', '', regex=False).astype(int)
+
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+df = sns.load_dataset('titanic')
+sns.countplot(x='pclass', data=df)
+plt.show()
+sns.barplot(x='sex', y='survived', data=df)
+plt.show()
+sns.heatmap(df.corr(numeric_only=True), annot=True, cmap='coolwarm')
+plt.show()
+
+
+import pandas as pd
+
+df = pd.read_csv('https://raw.githubusercontent.com/mwaskom/seaborn-data/master/tips.csv')
+
+df.groupby('day')['tip'].mean()
+df.groupby('day')['total_bill'].sum().idxmax()
+df.groupby(['sex', 'smoker'])['tip'].mean()
+
+
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+dates = pd.date_range(start='2023-01-01', periods=100)
+sales = np.random.randint(100, 500, size=100)
+df = pd.DataFrame({'Date': dates, 'Sales': sales}).set_index('Date')
+
+df['Sales'].plot()
+plt.show()
+
+df['Rolling_7'] = df['Sales'].rolling(window=7).mean()
+df['Rolling_7'].plot()
+plt.show()
+df.resample('W').sum()
+
 
