@@ -1,0 +1,67 @@
+/my_flask_app
+│
+├── app.py
+├── templates/
+│   ├── index.html
+│   └── about.html
+└── static/
+    └── style.css
+from flask import Flask, render_template, request, jsonify
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return render_template('index.html')
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+@app.route('/submit', methods=['POST'])
+def submit():
+    name = request.form.get('name')
+    return f"Hello, {name}!"
+
+@app.route('/api/data', methods=['GET'])
+def api_data():
+    sample_data = {
+        'id': 1,
+        'message': 'This is a JSON response'
+    }
+    return jsonify(sample_data)
+
+if __name__ == '__main__':
+    app.run(debug=True)
+    
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home</title>
+</head>
+<body>
+    <h1>Welcome to the Home Page</h1>
+    <form action="/submit" method="POST">
+        <input type="text" name="name" placeholder="Enter your name" />
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>About</title>
+</head>
+<body>
+    <h1>About This Website</h1>
+    <p>This is a sample site powered by Flask.</p>
+</body>
+</html>
+
+cd my_flask_app
+python app.py
+
+
+
+
+
