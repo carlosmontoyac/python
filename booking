@@ -1,0 +1,97 @@
+appointment_app/
+│
+├── app.py
+├── models.py
+├── database.db (auto-created)
+└── requirements.txt
+from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
+
+class Appointment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    client_name = db.Column(db.String(100), nullable=False)
+    date = db.Column(db.String(10), nullable=False)  # Format: YYYY-MM-DD
+    time = db.Column(db.String(5), nullable=False)   # Format: HH:MM
+    status = db.Column(db.String(10), default="booked")
+from flask import Flask, request, jsonify
+from models import db, Appointment
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db.init_app(app)
+
+with app.app_context():
+    db.create_all()
+
+@app.route('/')
+def home():
+    return {"message": "Appointment Booking System API"}
+
+@app.route('/appointments', methods=['GET'])
+def list_appointments():
+    appointments = Appointment.query.all()
+    result = []
+    for a in appointments:
+        result.append({
+            "id": a.id,
+            "client_name": a.client_name,
+            "date": a.date,
+            "time": a.time,
+            "status": a.status
+        })
+    return jsonify(result)
+
+@app.route('/available', methods=['GET'])
+def available_slots():
+    date = request.args.get('date')
+    slots = ["09:00", "10:00", "11:00", "13:00", "14:00"]
+    booked = Appointment.query.filter_by(date=date).all()
+    booked_times = [a.time for a in booked]
+    available = [s for s in slots if s not in booked_times]
+    return jsonify({"date": date, "available_slots": available})
+
+@app.route('/book', methods=['POST'])
+def book_appointment():
+    data = request.json
+    client_name = data.get('client_name')
+    date = data.get('date')
+    time = data.get('time')
+
+    existing = Appointment.query.filter_by(date=date, time=time).first()
+    if existing:
+        return jsonify({"error": "Slot already booked"}), 400
+
+    appointment = Appointment(client_name=client_name, date=date, time=time)
+    db.session.add(appointment)
+    db.session.commit()
+
+    return jsonify({
+        "message": "Appointment booked successfully!",
+        "appointment_id": appointment.id
+    })
+
+@app.route('/cancel/<int:appointment_id>', methods=['DELETE'])
+def cancel_appointment(appointment_id):
+    appointment = Appointment.query.get(appointment_id)
+    if not appointment:
+        return jsonify({"error": "Appointment not found"}), 404
+
+    appointment.status = "canceled"
+    db.session.commit()
+    return jsonify({"message": "Appointment canceled successfully"})
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+POST /book
+{
+  "client_name": "Alice",
+  "date": "2025-04-23",
+  "time": "09:00"
+}
+GET /available?date=2025-04-23
+DELETE /cancel/1
+GET /appointments
