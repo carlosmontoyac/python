@@ -1,0 +1,25 @@
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+todos = []
+next_id = 1
+
+@app.route('/todos', methods=['GET'])
+def get_todos():
+    pass  # Return all todos
+
+@app.route('/todos', methods=['POST'])
+def add_todo():
+    pass  # Add a new todo from JSON
+
+@app.route('/todos/<int:todo_id>', methods=['PUT'])
+def update_todo(todo_id):
+    pass  # Update a specific todo by ID
+
+@app.route('/todos/<int:todo_id>', methods=['DELETE'])
+def delete_todo(todo_id):
+    pass  # Delete a specific todo by ID
+
+if __name__ == '__main__':
+    app.run(debug=True)
