@@ -1,0 +1,183 @@
+import React from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Home from "./pages/Home";
+import BookAppointment from "./pages/BookAppointment";
+import AdminDashboard from "./pages/AdminDashboard";
+
+export default function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/book" element={<BookAppointment />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+      </Routes>
+    </Router>
+  );
+}
+
+
+import React from "react";
+import { Link } from "react-router-dom";
+
+export default function Home() {
+  return (
+    <div className="p-4 text-center">
+      <h1 className="text-3xl font-bold mb-4">Welcome to VetBooking</h1>
+      <Link to="/book" className="bg-blue-500 text-white px-4 py-2 rounded">Book Appointment</Link>
+    </div>
+  );
+}
+
+
+import React, { useState } from "react";
+
+export default function BookAppointment() {
+  const [form, setForm] = useState({ name: "", pet: "", date: "", time: "" });
+  const [status, setStatus] = useState("");
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch("https://localhost:5001/api/appointments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (res.ok) setStatus("Appointment booked successfully!");
+      else setStatus("Error booking appointment.");
+    } catch (err) {
+      setStatus("Network error.");
+    }
+  };
+
+  return (
+    <div className="max-w-md mx-auto p-4">
+      <h2 className="text-xl font-bold mb-4">Book an Appointment</h2>
+      <form onSubmit={handleSubmit} className="space-y-2">
+        <input name="name" onChange={handleChange} placeholder="Your Name" className="w-full p-2 border" required />
+        <input name="pet" onChange={handleChange} placeholder="Pet Type" className="w-full p-2 border" required />
+        <input type="date" name="date" onChange={handleChange} className="w-full p-2 border" required />
+        <input type="time" name="time" onChange={handleChange} className="w-full p-2 border" required />
+        <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded">Book</button>
+      </form>
+      {status && <p className="mt-2">{status}</p>}
+    </div>
+  );
+}
+
+import React, { useEffect, useState } from "react";
+
+export default function AdminDashboard() {
+  const [appointments, setAppointments] = useState([]);
+
+  useEffect(() => {
+    fetch("https://localhost:5001/api/appointments")
+      .then((res) => res.json())
+      .then(setAppointments);
+  }, []);
+
+  return (
+    <div className="p-4">
+      <h2 className="text-2xl font-bold mb-4">Admin Dashboard</h2>
+      <ul className="space-y-2">
+        {appointments.map((appt, index) => (
+          <li key={index} className="border p-2">
+            {appt.name} - {appt.pet} - {appt.date} at {appt.time}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+///////////////// backend with .net 
+namespace VetBookingApi.Models
+{
+    public class Appointment
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Pet { get; set; } = string.Empty;
+        public DateTime Date { get; set; }
+        public string Time { get; set; } = string.Empty;
+    }
+}
+
+// File: Controllers/AppointmentsController.cs
+using Microsoft.AspNetCore.Mvc;
+using VetBookingApi.Models;
+
+namespace VetBookingApi.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class AppointmentsController : ControllerBase
+    {
+        private static List<Appointment> _appointments = new();
+
+        [HttpGet]
+        public IActionResult Get() => Ok(_appointments);
+
+        [HttpPost]
+        public IActionResult Post([FromBody] Appointment appointment)
+        {
+            appointment.Id = _appointments.Count + 1;
+            _appointments.Add(appointment);
+            return CreatedAtAction(nameof(Get), new { id = appointment.Id }, appointment);
+        }
+    }
+}
+
+// File: Program.cs (for .NET 6+)
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+app.UseAuthorization();
+app.MapControllers();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.Run();
+
+// File: VetBookingApi.csproj
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>
+
+// Optional: launchSettings.json for local dev (Properties/launchSettings.json)
+{
+  "profiles": {
+    "VetBookingApi": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:5001;http://localhost:5000",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
+
+
+
