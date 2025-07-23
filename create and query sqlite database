@@ -1,1 +1,33 @@
+import sqlite3
+
+# Connect to DB
+conn = sqlite3.connect("employees.db")
+cursor = conn.cursor()
+
+# Create table
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS employees (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    department TEXT,
+    salary REAL
+)
+""")
+
+# Insert data
+cursor.executemany("INSERT INTO employees (name, department, salary) VALUES (?, ?, ?)", [
+    ("Alice", "HR", 55000),
+    ("Bob", "IT", 75000),
+    ("Charlie", "Finance", 62000)
+])
+conn.commit()
+
+# Query data
+cursor.execute("SELECT name, salary FROM employees WHERE salary > 60000")
+results = cursor.fetchall()
+
+for name, salary in results:
+    print(f"{name}: ${salary}")
+
+conn.close()
 
