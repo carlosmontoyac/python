@@ -1,0 +1,47 @@
+class Book:
+    def __init__(self, title, author, isbn):
+        self.title = title
+        self.author = author
+        self.isbn = isbn
+        self.is_available = True
+
+    def borrow(self):
+        if self.is_available:
+            self.is_available = False
+            print(f"{self.title} has been borrowed.")
+        else:
+            print(f"{self.title} is currently not available.")
+
+    def return_book(self):
+        self.is_available = True
+        print(f"{self.title} has been returned.")
+
+    def __str__(self):
+        return f"{self.title} by {self.author} ({'Available' if self.is_available else 'Checked Out'})"
+
+class Library:
+    def __init__(self, name):
+        self.name = name
+        self.books = []
+
+    def add_book(self, book):
+        self.books.append(book)
+        print(f"{book.title} added to {self.name} library.")
+
+    def show_books(self):
+        print(f"\nBooks in {self.name}:")
+        for book in self.books:
+            print(f"- {book}")
+
+# Example usage
+library = Library("Central Library")
+book1 = Book("1984", "George Orwell", "1234567890")
+book2 = Book("Brave New World", "Aldous Huxley", "9876543210")
+
+library.add_book(book1)
+library.add_book(book2)
+
+library.show_books()
+book1.borrow()
+library.show_books()
+book1.return_book()
