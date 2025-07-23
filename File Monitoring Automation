@@ -1,0 +1,13 @@
+import os
+import time
+
+folder_path = "./watched_folder"
+seen_files = set(os.listdir(folder_path))
+
+while True:
+    time.sleep(5)
+    current_files = set(os.listdir(folder_path))
+    new_files = current_files - seen_files
+    for file in new_files:
+        print(f"New file detected: {file}")
+    seen_files = current_files
