@@ -1,0 +1,35 @@
+class Plugin:
+    registry = {}
+
+    def __init_subclass__(cls, plugin_name=None, **kwargs):
+        super().__init_subclass__(**kwargs)
+        if plugin_name:
+            Plugin.registry[plugin_name] = cls
+
+    def execute(self, data):
+        raise NotImplementedError
+
+class UppercasePlugin(Plugin, plugin_name='uppercase'):
+    def execute(self, data):
+        return data.upper()
+
+class ReversePlugin(Plugin, plugin_name='reverse'):
+    def execute(self, data):
+        return data[::-1]
+
+class PluginRunner:
+    def __init__(self, plugin_type):
+        plugin_class = Plugin.registry.get(plugin_type)
+        if not plugin_class:
+            raise ValueError(f"Plugin '{plugin_type}' not found.")
+        self.plugin = plugin_class()
+
+    def run(self, data):
+        return self.plugin.execute(data)
+
+# Example
+runner = PluginRunner("uppercase")
+print(runner.run("hello world"))  # HELLO WORLD
+
+runner2 = PluginRunner("reverse")
+print(runner2.run("hello world"))  # dlrow olleh
