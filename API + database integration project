@@ -1,0 +1,55 @@
+import requests
+import sqlite3
+import time
+from datetime import datetime
+
+DB_NAME = 'crypto_data.db'
+API_URL = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd'
+
+def create_table():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS crypto_prices (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            price REAL,
+            timestamp TEXT
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+def fetch_prices():
+    response = requests.get(API_URL)
+    if response.status_code == 200:
+        data = response.json()
+        return {
+            'bitcoin': data['bitcoin']['usd'],
+            'ethereum': data['ethereum']['usd']
+        }
+    else:
+        print("API error:", response.status_code)
+        return None
+
+def save_to_db(prices):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    timestamp = datetime.now().isoformat()
+    for coin, price in prices.items():
+        cursor.execute('INSERT INTO crypto_prices (name, price, timestamp) VALUES (?, ?, ?)',
+                       (coin, price, timestamp))
+    conn.commit()
+    conn.close()
+
+def main():
+    create_table()
+    while True:
+        prices = fetch_prices()
+        if prices:
+            save_to_db(prices)
+            print(f"Saved: {prices}")
+        time.sleep(60)  # fetch every 60 seconds
+
+if __name__ == "__main__":
+    main()
