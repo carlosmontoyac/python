@@ -1,0 +1,19 @@
+import pandas as pd
+
+# Load CSV
+df = pd.read_csv("sales_data.csv")
+
+# Drop rows with missing values
+df.dropna(inplace=True)
+
+# Convert date column to datetime
+df['date'] = pd.to_datetime(df['date'])
+
+# Extract month
+df['month'] = df['date'].dt.to_period('M')
+
+# Calculate monthly sales
+monthly_sales = df.groupby('month')['amount'].sum()
+
+print(monthly_sales)
+
