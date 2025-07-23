@@ -1,0 +1,44 @@
+import os
+import shutil
+import logging
+
+SOURCE_DIR = "./downloads"
+LOG_FILE = "file_organizer.log"
+
+EXTENSION_MAP = {
+    ".pdf": "PDFs",
+    ".jpg": "Images",
+    ".png": "Images",
+    ".txt": "Texts",
+    ".docx": "Documents",
+    ".xlsx": "Spreadsheets",
+}
+
+def setup_logging():
+    logging.basicConfig(filename=LOG_FILE, level=logging.INFO,
+                        format='%(asctime)s - %(levelname)s - %(message)s')
+
+def move_file(file_path, target_dir):
+    try:
+        os.makedirs(target_dir, exist_ok=True)
+        shutil.move(file_path, os.path.join(target_dir, os.path.basename(file_path)))
+        logging.info(f"Moved {file_path} to {target_dir}")
+    except Exception as e:
+        logging.error(f"Failed to move {file_path}: {e}")
+
+def organize_files():
+    for filename in os.listdir(SOURCE_DIR):
+        full_path = os.path.join(SOURCE_DIR, filename)
+        if os.path.isfile(full_path):
+            ext = os.path.splitext(filename)[1].lower()
+            folder_name = EXTENSION_MAP.get(ext)
+            if folder_name:
+                target_folder = os.path.join(SOURCE_DIR, folder_name)
+                move_file(full_path, target_folder)
+            else:
+                logging.info(f"Unknown extension for {filename}, skipping.")
+
+if __name__ == "__main__":
+    setup_logging()
+    organize_files()
+    print("File organization complete. Check log for details.")
