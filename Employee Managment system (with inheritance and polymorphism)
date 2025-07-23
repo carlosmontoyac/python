@@ -1,0 +1,48 @@
+from abc import ABC, abstractmethod
+
+class Employee(ABC):
+    def __init__(self, name, id):
+        self.name = name
+        self.id = id
+
+    @abstractmethod
+    def calculate_salary(self):
+        pass
+
+    def __str__(self):
+        return f"{self.name} (ID: {self.id})"
+
+class FullTimeEmployee(Employee):
+    def __init__(self, name, id, monthly_salary):
+        super().__init__(name, id)
+        self.monthly_salary = monthly_salary
+
+    def calculate_salary(self):
+        return self.monthly_salary
+
+class PartTimeEmployee(Employee):
+    def __init__(self, name, id, hourly_rate, hours_worked):
+        super().__init__(name, id)
+        self.hourly_rate = hourly_rate
+        self.hours_worked = hours_worked
+
+    def calculate_salary(self):
+        return self.hourly_rate * self.hours_worked
+
+class Contractor(Employee):
+    def __init__(self, name, id, contract_fee):
+        super().__init__(name, id)
+        self.contract_fee = contract_fee
+
+    def calculate_salary(self):
+        return self.contract_fee
+
+# Test the system
+employees = [
+    FullTimeEmployee("Alice", 101, 5000),
+    PartTimeEmployee("Bob", 102, 20, 80),
+    Contractor("Charlie", 103, 3000)
+]
+
+for emp in employees:
+    print(f"{emp}: Salary = ${emp.calculate_salary()}")
